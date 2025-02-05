@@ -25,8 +25,8 @@ DEBUG = True
 
 # ALLOWED_HOSTS = ['127.0.0.1']
 
-SECRET_KEY = os.environ['SECRET_KEY']
-CSRF_TRUSTED_ORIGINS = ['*']
+SECRET_KEY = 'django-insecure-c-*3xp=^i1k#=-&l1^@a7q&2^!(kic)9&rks#i)$bd2fa2@%ar'
+CSRF_TRUSTED_ORIGINS = ['https://bunkerstuntplace.netlify.app/', 'https://p01--elbunker-be--px8448vvktxh.code.run/']
 ALLOWED_HOSTS = ['*']
 STATIC_ROOT = BASE_DIR / "static"
 
@@ -54,7 +54,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware'
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     'whitenoise.middleware.WhiteNoiseMiddleware', # Whitenoise
 ]
