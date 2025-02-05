@@ -20,13 +20,15 @@ CORS_ALLOW_ALL_ORIGINS = True  # For development only, configure properly for pr
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-c-*3xp=^i1k#=-&l1^@a7q&2^!(kic)9&rks#i)$bd2fa2@%ar'
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+# ALLOWED_HOSTS = ['127.0.0.1']
+
+SECRET_KEY = os.environ['SECRET_KEY']
+CSRF_TRUSTED_ORIGINS = ['*']
+ALLOWED_HOSTS = ['*']
+STATIC_ROOT = BASE_DIR / "static"
 
 
 # Application definition
@@ -53,6 +55,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware'
+
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Whitenoise
 ]
 
 ROOT_URLCONF = 'elbunker.urls'
