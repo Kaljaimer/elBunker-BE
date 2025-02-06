@@ -1,17 +1,49 @@
+from django.contrib.auth import authenticate
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-from django.contrib.auth import authenticate
-from .models import CustomUser, UserLogin
-from .serializers import UserSerializer
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser
+from django.shortcuts import get_object_or_404
+from .models import CustomUser, CheckIn
+from .serializers import UserSerializer, CheckInSerializer
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
+
+class CustomAuthToken(ObtainAuthToken):
+    @swagger_auto_schema(
+        operation_description="Authenticate user and return token",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING, description='Username'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='Password'),
+            },
+            required=['username', 'password']
+        ),
+        responses={200: 'Authentication successful', 400: 'Invalid credentials'}
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data,
+                                           context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user_id': user.pk,
+            'email': user.email,
+            'name': user.name,
+            'lastname': user.lastname,
+            'is_superuser': user.is_superuser
+        })
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [AllowAny]  # For development, change this for production
+    permission_classes = [IsAdminUser]
 
     @swagger_auto_schema(
         operation_description="Create a new user",
@@ -29,25 +61,55 @@ class UserViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
 
+class CheckInViewSet(viewsets.ModelViewSet):
+    queryset = CheckIn.objects.all()
+    serializer_class = CheckInSerializer
+    permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(
-        operation_description="Log in a user",
+        operation_description="Create a new check-in for the authenticated user",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['username', 'password'],
             properties={
-                'username': openapi.Schema(type=openapi.TYPE_STRING),
-                'password': openapi.Schema(type=openapi.TYPE_STRING),
+                'user_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='User ID')
             },
+            required=['user_id']
         ),
-        responses={200: 'Login successful', 401: 'Invalid credentials'}
+        responses={201: CheckInSerializer()}
     )
-    @action(detail=False, methods=['post'])
-    def login(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-        user = authenticate(username=username, password=password)
-        if user:
-            UserLogin.objects.create(user=user)
-            return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
-        else:
-            return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+    def create(self, request):
+        user_id = request.data.get('user_id')
+        user = get_object_or_404(CustomUser, id=user_id)
+        check_in = CheckIn.objects.create(user=user)
+        serializer = self.get_serializer(check_in)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @swagger_auto_schema(
+        operation_description="Get all check-ins",
+        responses={200: CheckInSerializer(many=True)}
+    )
+    def list(self, request):
+        check_ins = CheckIn.objects.all().order_by('-check_in_time')
+        serializer = self.get_serializer(check_ins, many=True)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_description="Get all check-ins for a specific user",
+        responses={200: CheckInSerializer(many=True)}
+    )
+    @action(detail=False, methods=['get'])
+    def user_check_ins(self, request):
+        user_id = request.query_params.get('user_id')
+        user = get_object_or_404(CustomUser, id=user_id)
+        check_ins = CheckIn.objects.filter(user=user).order_by('-check_in_time')
+        serializer = self.get_serializer(check_ins, many=True)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_description="Delete a specific check-in",
+        responses={204: "No content"}
+    )
+    def destroy(self, request, pk=None):
+        check_in = get_object_or_404(CheckIn, pk=pk)
+        check_in.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
