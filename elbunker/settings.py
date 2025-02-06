@@ -30,8 +30,10 @@ TOKEN_EXPIRED_AFTER_SECONDS = 86400  # 24 hours
 SECRET_KEY = 'django-insecure-c-*3xp=^i1k#=-&l1^@a7q&2^!(kic)9&rks#i)$bd2fa2@%ar'
 CSRF_TRUSTED_ORIGINS = [
     'https://bunkerstuntplace.netlify.app/',
-    'https://p01--elbunker--px8448vvktxh.code.run/'
-    'http://p01--elbunker--px8448vvktxh.code.run/'
+    'https://p01--elbunker--px8448vvktxh.code.run/',
+    'http://p01--elbunker--px8448vvktxh.code.run/',
+    'https://p01--elbunker--px8448vvktxh.code.run',
+    'http://p01--elbunker--px8448vvktxh.code.run',
 ]
 ACCESS_CONTROL_ALLOWED_HOSTS = ['*']
 ALLOWED_HOSTS = ['*']
