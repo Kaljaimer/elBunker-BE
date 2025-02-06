@@ -27,10 +27,10 @@ DEBUG = True
 
 SECRET_KEY = 'django-insecure-c-*3xp=^i1k#=-&l1^@a7q&2^!(kic)9&rks#i)$bd2fa2@%ar'
 CSRF_TRUSTED_ORIGINS = ['*']
-
+ACCESS_CONTROL_ALLOWED_HOSTS = ['*']
 ALLOWED_HOSTS = ['*']
 STATIC_ROOT = BASE_DIR / "static"
-
+CORS_ALLOWED_ORIGINS = ['*']
 
 # Application definition
 
