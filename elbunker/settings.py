@@ -30,7 +30,7 @@ CSRF_TRUSTED_ORIGINS = ['*']
 ACCESS_CONTROL_ALLOWED_HOSTS = ['*']
 ALLOWED_HOSTS = ['*']
 STATIC_ROOT = BASE_DIR / "static"
-CORS_ALLOWED_ORIGINS = ['*']
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Application definition
 
