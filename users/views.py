@@ -1,16 +1,19 @@
 from django.contrib.auth import authenticate
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import IsAdminUser
-from django.shortcuts import get_object_or_404
-from .models import CustomUser, CheckIn
-from .serializers import UserSerializer, CheckInSerializer
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
+from .models import CustomUser, CheckIn
+from .serializers import UserSerializer, CheckInSerializer
+from .models import ExpiringToken
 
 class CustomAuthToken(ObtainAuthToken):
     @swagger_auto_schema(
@@ -30,33 +33,44 @@ class CustomAuthToken(ObtainAuthToken):
                                            context={'request': request})
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
+        token, created = ExpiringToken.objects.get_or_create(user=user)
+
+        if not created and token.is_expired():
+            token.delete()
+            token = ExpiringToken.objects.create(user=user)
+
         return Response({
             'token': token.key,
+            'expires': token.expires,
             'user_id': user.pk,
             'email': user.email,
             'name': user.name,
             'lastname': user.lastname,
-            'is_superuser': user.is_superuser
         })
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAdminUser]
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [AllowAny()]
+        return super().get_permissions()
 
     @swagger_auto_schema(
         operation_description="Create a new user",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['username', 'email', 'password'],
             properties={
                 'username': openapi.Schema(type=openapi.TYPE_STRING),
                 'email': openapi.Schema(type=openapi.TYPE_STRING),
                 'password': openapi.Schema(type=openapi.TYPE_STRING),
+                'name': openapi.Schema(type=openapi.TYPE_STRING),
+                'lastname': openapi.Schema(type=openapi.TYPE_STRING),
             },
+            required=['username', 'email', 'password', 'name', 'lastname']
         ),
-        responses={201: UserSerializer}
+        responses={201: UserSerializer()}
     )
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)

@@ -24,15 +24,38 @@ CORS_ALLOW_ALL_ORIGINS = True  # For development only, configure properly for pr
 DEBUG = True
 
 # ALLOWED_HOSTS = ['127.0.0.1']
+AUTH_USER_MODEL = 'users.CustomUser'
+TOKEN_EXPIRED_AFTER_SECONDS = 86400  # 24 hours
 
 SECRET_KEY = 'django-insecure-c-*3xp=^i1k#=-&l1^@a7q&2^!(kic)9&rks#i)$bd2fa2@%ar'
 CSRF_TRUSTED_ORIGINS = [
     'https://bunkerstuntplace.netlify.app/',
     'https://p01--elbunker--px8448vvktxh.code.run/'
+    'http://p01--elbunker--px8448vvktxh.code.run/'
 ]
 ACCESS_CONTROL_ALLOWED_HOSTS = ['*']
 ALLOWED_HOSTS = ['*']
 STATIC_ROOT = BASE_DIR / "static"
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Token': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    },
+    'USE_SESSION_AUTH': False,
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'users.authentication.ExpiringTokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
 
 # Application definition
 

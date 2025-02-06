@@ -1,6 +1,22 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
+from django.conf import settings
+from datetime import timedelta
+from rest_framework.authtoken.models import Token as DefaultToken
+
+class ExpiringToken(DefaultToken):
+    expires = models.DateTimeField(null=True, blank=True)
+
+    def is_expired(self):
+        if self.expires is None:
+            return False
+        return self.expires < timezone.now()
+
+    def save(self, *args, **kwargs):
+        if not self.expires:
+            self.expires = timezone.now() + timedelta(hours=24)  # Set expiration to 24 hours
+        super().save(*args, **kwargs)
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
