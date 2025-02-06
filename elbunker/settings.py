@@ -26,7 +26,13 @@ DEBUG = True
 # ALLOWED_HOSTS = ['127.0.0.1']
 
 SECRET_KEY = 'django-insecure-c-*3xp=^i1k#=-&l1^@a7q&2^!(kic)9&rks#i)$bd2fa2@%ar'
-CSRF_TRUSTED_ORIGINS = ['https://bunkerstuntplace.netlify.app/', 'https://p01--elbunker-be--px8448vvktxh.code.run/']
+CSRF_TRUSTED_ORIGINS = [
+    'https://bunkerstuntplace.netlify.app',
+    'https://bunkerstuntplace.netlify.app/',
+    'https://p01--elbunker--px8448vvktxh.code.run',
+    'https://p01--elbunker--px8448vvktxh.code.run/',
+ ]
+
 ALLOWED_HOSTS = ['*']
 STATIC_ROOT = BASE_DIR / "static"
 
