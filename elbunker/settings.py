@@ -23,7 +23,7 @@ CORS_ALLOW_ALL_ORIGINS = True  # For development only, configure properly for pr
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1']
 AUTH_USER_MODEL = 'users.CustomUser'
 TOKEN_EXPIRED_AFTER_SECONDS = 86400  # 24 hours
 
