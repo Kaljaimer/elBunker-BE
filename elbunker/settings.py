@@ -15,18 +15,17 @@ import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-CORS_ALLOW_ALL_ORIGINS = True
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",  # Assuming your Vue app runs on port 8080
-#     "http://127.0.0.1:3000",
-#     "https://bunkerstuntplace.netlify.app",
-#     "https://p01--elbunker--px8448vvktxh.code.run",
-#     "http://p01--elbunker--px8448vvktxh.code.run",
-# ]
-# CORS_ALLOWED_ORIGIN_REGEXES = [
-#     r"^https://.*\.netlify\.app$",
-#     r"^https://.*\.code\.run$",
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Assuming your Vue app runs on port 8080
+    "http://127.0.0.1:3000",
+    "https://bunkerstuntplace.netlify.app",
+    "https://p01--elbunker--px8448vvktxh.code.run",
+    "http://p01--elbunker--px8448vvktxh.code.run",
+]
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.netlify\.app$",
+    r"^https://.*\.code\.run$",
+]
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_METHODS = [
@@ -54,7 +53,7 @@ CORS_ALLOW_HEADERS = [
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 AUTH_USER_MODEL = 'users.CustomUser'
 TOKEN_EXPIRED_AFTER_SECONDS = 86400  # 24 hours
