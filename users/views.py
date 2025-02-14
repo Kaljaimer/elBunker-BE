@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, exceptions
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -31,22 +31,34 @@ class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
                                            context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        token, created = ExpiringToken.objects.get_or_create(user=user)
+        try:
+            serializer.is_valid(raise_exception=True)
+            user = serializer.validated_data['user']
+            token, created = ExpiringToken.objects.get_or_create(user=user)
 
-        if not created and token.is_expired():
-            token.delete()
-            token = ExpiringToken.objects.create(user=user)
+            if not created and token.is_expired():
+                token.delete()
+                token = ExpiringToken.objects.create(user=user)
 
-        return Response({
-            'token': token.key,
-            'expires': token.expires,
-            'user_id': user.pk,
-            'email': user.email,
-            'name': user.name,
-            'lastname': user.lastname,
-        })
+            return Response({
+                'token': token.key,
+                'expires': token.expires,
+                'user_id': user.pk,
+                'email': user.email,
+                'name': user.name,
+                'lastname': user.lastname,
+                'is_superuser': user.is_superuser
+            })
+        except exceptions.ValidationError as e:
+            return Response({
+                'error': 'Authentication failed',
+                'detail': 'Usuario o contraseña incorrectos'
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            return Response({
+                'error': 'Ha ocurrido un error inesperado',
+                'detail': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
@@ -106,6 +118,39 @@ class CheckInViewSet(viewsets.ModelViewSet):
         check_ins = CheckIn.objects.all().order_by('-check_in_time')
         serializer = self.get_serializer(check_ins, many=True)
         return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_description="Get the last check-in of a user",
+        manual_parameters=[
+            openapi.Parameter(
+                'user_id',
+                openapi.IN_QUERY,
+                description="ID of the user",
+                type=openapi.TYPE_INTEGER,
+                required=True
+            )
+        ],
+        responses={
+            200: CheckInSerializer,
+            404: 'User not found or no check-ins available'
+        }
+    )
+    @action(detail=False, methods=['get'])
+    def last_checkin(self, request):
+        user_id = request.query_params.get('user_id')
+        if not user_id:
+            return Response({"error": "User ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = get_object_or_404(CustomUser, id=user_id)
+        last_checkin = CheckIn.objects.filter(user=user).order_by('-check_in_time').first()
+
+        if not last_checkin:
+            return Response({"message": "No check-ins found for this user"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.get_serializer(last_checkin)
+        return Response(serializer.data)
+
+
 
     @swagger_auto_schema(
         operation_description="Get all check-ins for a specific user",
