@@ -15,8 +15,39 @@ import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-CORS_ALLOW_ALL_ORIGINS = True  # For development only, configure properly for production
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Assuming your Vue app runs on port 8080
+    "http://127.0.0.1:3000",
+    "https://bunkerstuntplace.netlify.app",
+    "https://p01--elbunker--px8448vvktxh.code.run",
+    "http://p01--elbunker--px8448vvktxh.code.run",
+]
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.netlify\.app$",
+    r"^https://.*\.code\.run$",
+]
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -24,20 +55,16 @@ CORS_ALLOW_CREDENTIALS = True
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
 AUTH_USER_MODEL = 'users.CustomUser'
 TOKEN_EXPIRED_AFTER_SECONDS = 86400  # 24 hours
 
 SECRET_KEY = 'django-insecure-c-*3xp=^i1k#=-&l1^@a7q&2^!(kic)9&rks#i)$bd2fa2@%ar'
 CSRF_TRUSTED_ORIGINS = [
-    'https://bunkerstuntplace.netlify.app/',
-    'https://p01--elbunker--px8448vvktxh.code.run/',
-    'http://p01--elbunker--px8448vvktxh.code.run/',
+    'https://bunkerstuntplace.netlify.app',
     'https://p01--elbunker--px8448vvktxh.code.run',
     'http://p01--elbunker--px8448vvktxh.code.run',
-    'http://localhost:3000/'
+    'http://localhost:3000',
 ]
-ACCESS_CONTROL_ALLOWED_HOSTS = ['*']
 ALLOWED_HOSTS = ['*']
 STATIC_ROOT = BASE_DIR / "static"
 
