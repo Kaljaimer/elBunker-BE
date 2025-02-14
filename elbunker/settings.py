@@ -34,6 +34,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://p01--elbunker--px8448vvktxh.code.run/',
     'https://p01--elbunker--px8448vvktxh.code.run',
     'http://p01--elbunker--px8448vvktxh.code.run',
+    'http://localhost:3000/'
 ]
 ACCESS_CONTROL_ALLOWED_HOSTS = ['*']
 ALLOWED_HOSTS = ['*']
